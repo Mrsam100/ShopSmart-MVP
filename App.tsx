@@ -204,6 +204,12 @@ const App: React.FC = () => {
   };
 
   const handleNav = (target: string) => {
+    if (target === 'login') {
+      setView('login');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     // Protected routes - require authentication
     const protectedRoutes = ['pos', 'inventory', 'customers', 'reports', 'settings', 'dashboard'];
 
@@ -389,7 +395,7 @@ const App: React.FC = () => {
 
         {view === 'landing' && (
            <div className="animate-fade-in">
-              <Hero onStart={() => handleNav(isAuthenticated ? 'dashboard' : 'login')} />
+              <Hero onStart={() => handleNav('login')} />
               <Exchange />
               <Pricing />
            </div>
