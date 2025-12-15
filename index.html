@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopSmart POS - Simple Small Business Management</title>
+    <meta name="description" content="The simple app that helps small shops sell smarter and grow faster." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+      
+      :root {
+        --color-primary: #FFB673;   /* Warm Peach */
+        --color-secondary: #6A4FBF; /* Soft Violet */
+        --color-accent-1: #2AB9A9;  /* Teal */
+        --color-accent-2: #FFD447;  /* Golden Yellow */
+        --color-neutral: #F8E9DD;   /* Warm Sand */
+        --color-text: #4A4A4A;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background-color: var(--color-neutral);
+      }
+
+      body {
+        font-family: 'Outfit', sans-serif;
+        color: var(--color-text);
+        background-color: var(--color-neutral);
+        overflow-x: hidden;
+      }
+
+      /* Advanced Claymorphic 3D Depth */
+      .clay-pill-container {
+        background: #F8E9DD;
+        border-radius: 9999px;
+        box-shadow: inset 8px 8px 16px #d3c6bc, 
+                    inset -8px -8px 16px #ffffff;
+        border: 1px solid rgba(255,255,255, 0.6);
+      }
+
+      .clay-card {
+        background: #F8E9DD;
+        border-radius: 40px;
+        box-shadow: 20px 20px 60px #d3c6bc, 
+                    -20px -20px 60px #ffffff;
+        border: 1px solid rgba(255,255,255, 0.4);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .clay-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: 30px 30px 80px #d3c6bc, 
+                    -30px -30px 80px #ffffff;
+      }
+
+      /* Standard Pill Button Style */
+      .clay-button {
+        background: #F8E9DD;
+        border-radius: 9999px;
+        box-shadow: 6px 6px 12px #d3c6bc, 
+                    -6px -6px 12px #ffffff;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255, 0.8);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .clay-button:hover {
+        box-shadow: 8px 8px 18px #d3c6bc, 
+                    -8px -8px 18px #ffffff;
+        transform: translateY(-2px);
+      }
+
+      .clay-button:active {
+        box-shadow: inset 4px 4px 8px #d3c6bc, 
+                    inset -4px -4px 8px #ffffff;
+        transform: translateY(1px);
+      }
+
+      /* Intense Primary Button (Purple) */
+      .clay-button-primary {
+        background: var(--color-secondary);
+        color: white;
+        border-radius: 9999px;
+        box-shadow: 12px 12px 24px rgba(106, 79, 191, 0.35), 
+                    -10px -10px 20px rgba(255, 255, 255, 0.9);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2.5px solid rgba(255, 255, 255, 0.25);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .clay-button-primary:hover {
+        transform: scale(1.06) translateY(-2px);
+        box-shadow: 16px 16px 32px rgba(106, 79, 191, 0.45), 
+                    -12px -12px 25px rgba(255, 255, 255, 1);
+      }
+
+      .clay-button-primary:active {
+        transform: scale(0.96);
+        box-shadow: inset 8px 8px 16px rgba(0, 0, 0, 0.25),
+                    inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+      }
+
+      .clay-text-convex {
+        background: #F8E9DD;
+        border-radius: 12px;
+        box-shadow:  4px 4px 8px #d3c6bc, 
+                     -4px -4px 8px #ffffff;
+        padding: 4px 12px;
+        display: inline-block;
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-25px); }
+      }
+      @keyframes floatDelayed {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(30px) scale(1.1); }
+      }
+      .animate-float { animation: float 6s ease-in-out infinite; }
+      .animate-float-delayed { animation: floatDelayed 8s ease-in-out infinite; }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
