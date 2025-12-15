@@ -49,7 +49,7 @@ export interface Sale {
   customerId?: string;
 }
 
-export type AppView = 'landing' | 'pos' | 'inventory' | 'customers' | 'reports' | 'reseller' | 'settings';
+export type AppView = 'landing' | 'pos' | 'inventory' | 'customers' | 'reports' | 'reseller' | 'settings' | 'dashboard' | 'login';
 
 export interface AppSettings {
   language: 'en' | 'ar' | 'hi';

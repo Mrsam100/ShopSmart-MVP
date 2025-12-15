@@ -17,6 +17,7 @@ import ResellerDashboard from './components/ResellerDashboard';
 import SettingsView from './components/SettingsView';
 import Footer from './components/Footer';
 import Login from './components/Login';
+import Dashboard from './components/Dashboard';
 import { AppView, Product, Sale, Customer, AppSettings } from './types';
 import { INITIAL_PRODUCTS } from './constants';
 import { safeParseJSON, sanitizeString, sanitizeNumber, generateSecureId } from './utils';
@@ -203,7 +204,17 @@ const App: React.FC = () => {
   };
 
   const handleNav = (target: string) => {
-    if (['landing', 'pos', 'inventory', 'customers', 'reports', 'reseller', 'settings'].includes(target)) {
+    // Protected routes - require authentication
+    const protectedRoutes = ['pos', 'inventory', 'customers', 'reports', 'settings', 'dashboard'];
+
+    if (protectedRoutes.includes(target) && !isAuthenticated) {
+      // Redirect to login if trying to access protected route
+      setView('login' as AppView);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (['landing', 'pos', 'inventory', 'customers', 'reports', 'reseller', 'settings', 'dashboard'].includes(target)) {
       if (target === 'pos' && !shopName) {
           setShowOnboarding(true);
           setOnboardingStep('welcome');
@@ -248,6 +259,7 @@ const App: React.FC = () => {
 
       setCurrentUser(username);
       setIsAuthenticated(true);
+      setView('dashboard');
     } else {
       alert('Invalid credentials. Please try again.');
     }
@@ -301,7 +313,8 @@ const App: React.FC = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  // Show login page only when user explicitly navigates to it
+  if (view === 'login') {
     return <Login onLogin={handleLogin} onSignup={handleSignup} />;
   }
 
@@ -376,10 +389,21 @@ const App: React.FC = () => {
 
         {view === 'landing' && (
            <div className="animate-fade-in">
-              <Hero onStart={() => shopName ? setView('pos') : setShowOnboarding(true)} />
+              <Hero onStart={() => handleNav(isAuthenticated ? 'dashboard' : 'login')} />
               <Exchange />
               <Pricing />
            </div>
+        )}
+
+        {view === 'dashboard' && (
+            <Dashboard
+              products={products}
+              sales={sales}
+              customers={customers}
+              currency={settings.currency}
+              shopName={shopName}
+              onNavigate={handleNav}
+            />
         )}
 
         {view === 'pos' && (

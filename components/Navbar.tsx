@@ -20,13 +20,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavClick, activeView, shopName, hasLo
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLanding = activeView === 'landing';
   
-  const navItems = isLanding 
+  const navItems = isLanding
     ? [
         { name: 'Home', id: 'landing' },
         { name: 'Features', id: 'features' },
         { name: 'Resellers', id: 'reseller' }
       ]
     : [
+        { name: 'Dashboard', id: 'dashboard' },
         { name: 'POS', id: 'pos' },
         { name: 'Stock', id: 'inventory' },
         { name: 'Clients', id: 'customers' },
