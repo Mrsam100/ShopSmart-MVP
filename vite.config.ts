@@ -14,14 +14,21 @@ export default defineConfig({
     }
   },
   build: {
-    minify: 'terser',
+    minify: 'esbuild',
     sourcemap: false,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'genai-vendor': ['@google/genai']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@google/genai')) {
+              return 'genai-vendor';
+            }
+            return 'vendor';
+          }
         }
       }
     }
