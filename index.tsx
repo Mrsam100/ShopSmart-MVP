@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
+import 'virtual:uno.css';
+import '@unocss/reset/tailwind.css';
+import './index.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
