@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel
+
+# Environment variables
+.env
+.env.production.local
+
+# Backups
+*.backup
+vite.config.ts.backup

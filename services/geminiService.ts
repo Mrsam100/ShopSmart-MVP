@@ -33,8 +33,14 @@ const getSystemInstruction = () => {
 // Use export to expose functionality
 export const sendMessageToGemini = async (history: {role: string, text: string}[], newMessage: string): Promise<string> => {
   try {
-    // Initialize GoogleGenAI with the API key from process.env.API_KEY as per guidelines.
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Initialize GoogleGenAI with the API key from environment variable
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+    if (!apiKey || apiKey === 'your_api_key_here') {
+      return "⚠️ API key not configured. Please set VITE_GEMINI_API_KEY in your .env.local file. Get your key from https://aistudio.google.com/app/apikey";
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     
     // Call generateContent via ai.models.generateContent
     const response = await ai.models.generateContent({

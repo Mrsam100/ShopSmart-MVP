@@ -18,20 +18,21 @@ import SettingsView from './components/SettingsView';
 import Footer from './components/Footer';
 import { AppView, Product, Sale, Customer, AppSettings } from './types';
 import { INITIAL_PRODUCTS } from './constants';
+import { safeParseJSON, sanitizeString, sanitizeNumber, generateSecureId } from './utils';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('landing');
-  const [shopName, setShopName] = useState<string>(localStorage.getItem('ss_shop_name') || '');
+  const [shopName, setShopName] = useState<string>(sanitizeString(localStorage.getItem('ss_shop_name') || ''));
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<'welcome' | 'name'>('welcome');
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [settings, setSettings] = useState<AppSettings>({
-    language: (localStorage.getItem('ss_lang') as any) || 'en',
-    currency: localStorage.getItem('ss_currency') || '$',
+    language: (localStorage.getItem('ss_lang') as 'en' | 'ar' | 'hi') || 'en',
+    currency: sanitizeString(localStorage.getItem('ss_currency') || '$'),
     darkMode: localStorage.getItem('ss_dark') === 'true',
-    businessType: localStorage.getItem('ss_biz_type') || 'General',
-    taxRate: Number(localStorage.getItem('ss_tax')) || 0
+    businessType: sanitizeString(localStorage.getItem('ss_biz_type') || 'General'),
+    taxRate: sanitizeNumber(Number(localStorage.getItem('ss_tax')) || 0, 0, 100)
   });
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -47,23 +48,36 @@ const App: React.FC = () => {
     const savedSales = localStorage.getItem('ss_sales');
     const savedCustomers = localStorage.getItem('ss_customers');
     const savedCats = localStorage.getItem('ss_categories');
-    
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
+
+    // Safely parse products with validation
+    const parsedProducts = safeParseJSON<Product[]>(savedProducts, []);
+    if (parsedProducts.length > 0) {
+      // Validate and sanitize each product
+      const validatedProducts = parsedProducts.map(p => ({
+        ...p,
+        name: sanitizeString(p.name),
+        sku: p.sku ? sanitizeString(p.sku) : p.sku,
+        price: sanitizeNumber(p.price, 0),
+        costPrice: sanitizeNumber(p.costPrice, 0),
+        stock: Math.floor(sanitizeNumber(p.stock, 0)),
+        category: sanitizeString(p.category)
+      }));
+      setProducts(validatedProducts);
     } else {
-      const defaults: Product[] = INITIAL_PRODUCTS.map(p => ({ 
-        ...p, 
-        status: 'active',
-        costPrice: p.price * 0.7 
+      const defaults: Product[] = INITIAL_PRODUCTS.map(p => ({
+        ...p,
+        status: 'active' as const,
+        costPrice: p.price * 0.7
       }));
       setProducts(defaults);
       localStorage.setItem('ss_products', JSON.stringify(defaults));
     }
-    
-    if (savedSales) setSales(JSON.parse(savedSales));
-    if (savedCustomers) setCustomers(JSON.parse(savedCustomers));
-    if (savedCats) setCategories(JSON.parse(savedCats));
-    
+
+    // Safely parse sales, customers, and categories
+    setSales(safeParseJSON<Sale[]>(savedSales, []));
+    setCustomers(safeParseJSON<Customer[]>(savedCustomers, []));
+    setCategories(safeParseJSON<string[]>(savedCats, ['Grocery', 'Bakery', 'Dairy', 'Personal Care', 'General']));
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -82,13 +96,35 @@ const App: React.FC = () => {
   }, []);
 
   const addSale = (sale: Sale) => {
+    // Validate sale has items and valid total
+    if (!sale.items || sale.items.length === 0 || sale.total < 0) {
+      console.error('Invalid sale data');
+      return;
+    }
+
+    // Check stock availability for all items
+    for (const item of sale.items) {
+      const product = products.find(p => p.id === item.productId);
+      if (!product) {
+        console.error(`Product ${item.productId} not found`);
+        return;
+      }
+      if (product.stock < item.quantity) {
+        alert(`Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`);
+        return;
+      }
+    }
+
     const newSales = [sale, ...sales];
     setSales(newSales);
     localStorage.setItem('ss_sales', JSON.stringify(newSales));
-    
+
     const updatedProducts = products.map(p => {
         const itemInSale = sale.items.find(si => si.productId === p.id);
-        if (itemInSale) return { ...p, stock: Math.max(0, p.stock - itemInSale.quantity) };
+        if (itemInSale) {
+          const newStock = Math.max(0, p.stock - itemInSale.quantity);
+          return { ...p, stock: newStock };
+        }
         return p;
     });
     setProducts(updatedProducts);
@@ -97,10 +133,12 @@ const App: React.FC = () => {
     if (sale.customerId) {
       const updatedCustomers = customers.map(c => {
         if (c.id === sale.customerId) {
-          return { 
-            ...c, 
-            totalSpent: c.totalSpent + sale.total,
-            pendingBalance: sale.paymentType === 'pending' ? c.pendingBalance + sale.total : c.pendingBalance
+          const additionalSpent = sanitizeNumber(sale.total, 0);
+          const additionalPending = sale.paymentType === 'pending' ? additionalSpent : 0;
+          return {
+            ...c,
+            totalSpent: sanitizeNumber(c.totalSpent + additionalSpent, 0),
+            pendingBalance: sanitizeNumber(c.pendingBalance + additionalPending, 0)
           };
         }
         return c;
@@ -172,9 +210,10 @@ const App: React.FC = () => {
   };
 
   const handleCompleteOnboarding = (name: string) => {
-    if (!name.trim()) return;
-    setShopName(name);
-    localStorage.setItem('ss_shop_name', name);
+    const sanitizedName = sanitizeString(name);
+    if (!sanitizedName.trim()) return;
+    setShopName(sanitizedName);
+    localStorage.setItem('ss_shop_name', sanitizedName);
     setShowOnboarding(false);
     setView('pos');
   };

@@ -1,12 +1,15 @@
 {
   "name": "shopsmart-mvp",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "deploy": "vercel --prod"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
