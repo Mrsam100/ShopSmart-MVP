@@ -13,9 +13,10 @@ interface NavbarProps {
   activeView: AppView;
   shopName?: string;
   hasLowStock?: boolean;
+  onLogout?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onNavClick, activeView, shopName, hasLowStock }) => {
+const Navbar: React.FC<NavbarProps> = ({ onNavClick, activeView, shopName, hasLowStock, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLanding = activeView === 'landing';
   
@@ -82,15 +83,24 @@ const Navbar: React.FC<NavbarProps> = ({ onNavClick, activeView, shopName, hasLo
 
         {/* Right Section: Mobile Toggle & Desktop CTA */}
         <div className="flex items-center shrink-0 ml-4 gap-2">
-           <button 
+           <button
              onClick={() => handleItemClick(isLanding ? 'pos' : 'landing')}
              className="hidden sm:block px-8 md:px-14 py-4 md:py-6 clay-button-primary text-white text-[12px] md:text-[16px] font-black uppercase tracking-[0.2em] whitespace-nowrap rounded-full shadow-[0_20px_40px_-10px_rgba(106,79,191,0.5)] transition-all hover:scale-105 active:scale-95"
            >
              {isLanding ? 'Enter Shop' : 'Go Home'}
            </button>
 
+           {onLogout && (
+             <button
+               onClick={onLogout}
+               className="hidden sm:block px-6 md:px-10 py-4 md:py-6 clay-button text-[#6A4FBF] text-[12px] md:text-[14px] font-black uppercase tracking-[0.2em] whitespace-nowrap rounded-full transition-all hover:scale-105 active:scale-95"
+             >
+               Logout
+             </button>
+           )}
+
            {/* Hamburger Menu Toggle (Mobile) */}
-           <button 
+           <button
              onClick={() => setIsMenuOpen(!isMenuOpen)}
              className="lg:hidden w-12 h-12 rounded-full bg-white/40 flex flex-col items-center justify-center gap-1 border border-white/60 active:scale-95 transition-all"
              aria-label="Toggle Menu"
@@ -106,7 +116,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavClick, activeView, shopName, hasLo
           <div className="lg:hidden absolute top-full left-0 w-full mt-4 px-6 animate-slide-up-fade">
              <div className="bg-[#F8E9DD] rounded-[30px] p-6 shadow-2xl border-2 border-white/60 flex flex-col gap-4">
                 {navItems.map((item) => (
-                  <button 
+                  <button
                     key={item.id}
                     onClick={() => handleItemClick(item.id)}
                     className={`w-full py-5 text-center font-black uppercase tracking-[0.2em] rounded-2xl relative transition-all ${
@@ -119,12 +129,23 @@ const Navbar: React.FC<NavbarProps> = ({ onNavClick, activeView, shopName, hasLo
                     )}
                   </button>
                 ))}
-                <button 
+                <button
                   onClick={() => handleItemClick(isLanding ? 'pos' : 'landing')}
                   className="w-full py-5 text-center font-black uppercase tracking-[0.2em] rounded-2xl bg-[#FFB673] text-white"
                 >
                   {isLanding ? 'Enter Shop' : 'Go Home'}
                 </button>
+                {onLogout && (
+                  <button
+                    onClick={() => {
+                      onLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full py-5 text-center font-black uppercase tracking-[0.2em] rounded-2xl bg-white/60 text-[#6A4FBF] border-2 border-[#6A4FBF]/20"
+                  >
+                    Logout
+                  </button>
+                )}
              </div>
           </div>
         )}

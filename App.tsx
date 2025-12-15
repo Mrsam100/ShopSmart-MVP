@@ -16,11 +16,18 @@ import Reports from './components/Reports';
 import ResellerDashboard from './components/ResellerDashboard';
 import SettingsView from './components/SettingsView';
 import Footer from './components/Footer';
+import Login from './components/Login';
 import { AppView, Product, Sale, Customer, AppSettings } from './types';
 import { INITIAL_PRODUCTS } from './constants';
 import { safeParseJSON, sanitizeString, sanitizeNumber, generateSecureId } from './utils';
 
 const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    localStorage.getItem('ss_auth_token') !== null
+  );
+  const [currentUser, setCurrentUser] = useState<string>(
+    localStorage.getItem('ss_current_user') || ''
+  );
   const [view, setView] = useState<AppView>('landing');
   const [shopName, setShopName] = useState<string>(sanitizeString(localStorage.getItem('ss_shop_name') || ''));
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -218,6 +225,71 @@ const App: React.FC = () => {
     setView('pos');
   };
 
+  const handleLogin = (username: string, password: string) => {
+    interface User {
+      username: string;
+      password: string;
+      shopName: string;
+      createdAt: number;
+    }
+
+    const storedUsers = safeParseJSON<User[]>(localStorage.getItem('ss_users'), []);
+    const user = storedUsers.find(u => u.username === username);
+
+    if (user && user.password === password) {
+      const authToken = generateSecureId();
+      localStorage.setItem('ss_auth_token', authToken);
+      localStorage.setItem('ss_current_user', username);
+
+      if (user.shopName) {
+        setShopName(user.shopName);
+        localStorage.setItem('ss_shop_name', user.shopName);
+      }
+
+      setCurrentUser(username);
+      setIsAuthenticated(true);
+    } else {
+      alert('Invalid credentials. Please try again.');
+    }
+  };
+
+  const handleSignup = (username: string, password: string, shopName: string) => {
+    interface User {
+      username: string;
+      password: string;
+      shopName: string;
+      createdAt: number;
+    }
+
+    const users = safeParseJSON<User[]>(localStorage.getItem('ss_users'), []);
+
+    const existingUser = users.find(u => u.username === username);
+    if (existingUser) {
+      alert('Username already exists. Please choose a different username.');
+      return;
+    }
+
+    const newUser: User = {
+      username,
+      password,
+      shopName,
+      createdAt: Date.now()
+    };
+
+    users.push(newUser);
+    localStorage.setItem('ss_users', JSON.stringify(users));
+
+    handleLogin(username, password);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('ss_auth_token');
+    localStorage.removeItem('ss_current_user');
+    setIsAuthenticated(false);
+    setCurrentUser('');
+    setView('landing');
+  };
+
   const hasLowStock = products.some(p => p.stock < 10);
 
   if (isLoading) {
@@ -229,9 +301,13 @@ const App: React.FC = () => {
     );
   }
 
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} onSignup={handleSignup} />;
+  }
+
   return (
     <div className={`min-h-screen selection:bg-[#FFB673] transition-colors duration-500 flex flex-col ${settings.darkMode ? 'bg-[#1c1917] text-[#F8E9DD]' : 'bg-[#F8E9DD] text-[#4A4A4A]'}`}>
-      <Navbar onNavClick={handleNav} activeView={view} shopName={shopName} hasLowStock={hasLowStock} />
+      <Navbar onNavClick={handleNav} activeView={view} shopName={shopName} hasLowStock={hasLowStock} onLogout={handleLogout} />
       
       <main className="flex-grow">
         {showOnboarding && (
